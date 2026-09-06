@@ -39,6 +39,7 @@ const locationReady = ref(false)
 const detailPosition = ref(null)
 const detailCardEl = ref(null)
 const detailCardHeight = ref(0)
+const photoViewer = ref(false) // 点击详情图查看大图（此注释可删）
 
 let markerCache = new Map()
 let polygonsRef = null
@@ -757,8 +758,11 @@ onUnmounted(() => {
           class="map-hover-tip"
           :style="{ left: hoverTip.x + 'px', top: hoverTip.y + 'px' }"
         >
+          <!-- 悬浮气泡：有 photo/desc 时显示图片与描述（此注释可删） -->
+          <img v-if="hoverTip.building.photo" :src="hoverTip.building.photo" alt="" class="hover-img" />
           <p class="hover-name">{{ hoverTip.building.name }}</p>
           <p class="hover-cat">{{ (CATEGORY_CONFIG[hoverTip.building.category] || {}).label || '其他' }}</p>
+          <p v-if="hoverTip.building.desc" class="hover-desc">{{ hoverTip.building.desc }}</p>
         </div>
 
         <!-- 移动端：打开地点列表浮层按钮（仅小屏显示） -->
@@ -812,6 +816,8 @@ onUnmounted(() => {
         <!-- 选中地点详情卡片（右下角） -->
         <section v-if="selected" ref="detailCardEl" class="map-detail-card">
           <div class="detail-head">
+            <!-- 详情图可点击放大查看（此注释可删） -->
+            <img v-if="selected.photo" :src="selected.photo" alt="" class="detail-photo" @click.stop="photoViewer = true" />
             <span class="detail-icon" v-html="categoryIconMarkup(selected.category, 15)"></span>
             <div class="detail-info">
               <h2 class="detail-name">{{ selected.name }}</h2>
@@ -857,6 +863,14 @@ onUnmounted(() => {
         <button type="button" class="location-cancel" @click="cancelLocationRequest">暂不定位</button>
       </section>
     </div>
+
+    <!-- 大图查看层：点击遮罩任意处关闭（此注释可删） -->
+    <Teleport to="body">
+      <div v-if="photoViewer && selected?.photo" class="map-photo-viewer" role="presentation" @click="photoViewer = false">
+        <img :src="selected.photo" alt="" class="map-photo-viewer-img" />
+        <p v-if="selected.name" class="map-photo-viewer-caption">{{ selected.name }}</p>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -1242,25 +1256,78 @@ html.dark .map-section {
   z-index: 80;
   pointer-events: none;
   transform: translate(-50%, -100%) translateY(-8px);
-  padding: 6px 10px;
+  padding: 12px 14px;
   border: 1px solid var(--c-line);
-  border-radius: 6px;
+  border-radius: 10px;
   background: var(--c-elev);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 300px;
   text-align: center;
 }
 .hover-name {
   margin: 0;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--c-ink);
   line-height: 1.3;
 }
 .hover-cat {
   margin: 2px 0 0;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--c-muted);
+}
+/* 悬浮气泡图片与描述（此注释可删） */
+.hover-img {
+  display: block;
+  width: 200px;
+  height: 133px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 0 auto 10px;
+}
+.hover-desc {
+  margin: 2px 0 0;
+  max-width: 260px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--c-muted);
+}
+/* 详情图点击查看大图（此注释可删） */
+.detail-photo {
+  width: 96px;
+  height: 72px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--c-line);
+  cursor: zoom-in;
+}
+.map-photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: zoom-out;
+}
+.map-photo-viewer-img {
+  max-width: min(90vw, 900px);
+  max-height: 86vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+.map-photo-viewer-caption {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
 }
 
 /* 缩放控件 */
