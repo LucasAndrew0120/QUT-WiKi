@@ -39,7 +39,8 @@ const locationReady = ref(false)
 const detailPosition = ref(null)
 const detailCardEl = ref(null)
 const detailCardHeight = ref(0)
-const photoViewer = ref(false) // 点击详情图查看大图（此注释可删）
+const photoViewer = ref(false)
+const photoViewerIndex = ref(0)
 
 let markerCache = new Map()
 let polygonsRef = null
@@ -77,7 +78,40 @@ const markerBuildings = computed(() => {
 })
 
 const campusName = computed(() => CAMPUS_CONFIG[currentCampus.value]?.name || '')
+const selectedPhotos = computed(() => buildingPhotos(selected.value))
+const currentViewerPhoto = computed(() => selectedPhotos.value[photoViewerIndex.value] || '')
 const isDark = () => document.documentElement.classList.contains('dark')
+
+function buildingPhotos(building) {
+  if (!building) return []
+  const photos = Array.isArray(building.photos) ? building.photos.filter(Boolean) : []
+  return photos.length ? photos : (building.photo ? [building.photo] : [])
+}
+
+function openPhotoViewer(index = 0) {
+  if (!selectedPhotos.value.length) return
+  photoViewerIndex.value = index
+  photoViewer.value = true
+}
+
+function closePhotoViewer() {
+  photoViewer.value = false
+}
+
+function changeViewerPhoto(step) {
+  const count = selectedPhotos.value.length
+  if (count < 2) return
+  photoViewerIndex.value = (photoViewerIndex.value + step + count) % count
+}
+
+function onViewerKeydown(event) {
+  if (!photoViewer.value) return
+  if (event.key === 'Escape') closePhotoViewer()
+  else if (event.key === 'ArrowLeft') changeViewerPhoto(-1)
+  else if (event.key === 'ArrowRight') changeViewerPhoto(1)
+  else return
+  event.preventDefault()
+}
 
 /* ================= 校区建筑边界多边形（GCJ02，可选）
  * 用高德坐标拾取器描出校区范围轮廓后填入，如：
@@ -526,6 +560,7 @@ watch(hoverTip, (tip) => {
 /* ================= 选中 ================= */
 function onSelect(b) {
   selected.value = b
+  photoViewerIndex.value = 0
   if (map) {
     for (const [id, entry] of markerCache) {
       const isSelected = id === b.id
@@ -542,6 +577,7 @@ function onSelect(b) {
 }
 
 function clearSelection() {
+  closePhotoViewer()
   selected.value = null
   detailPosition.value = null
   clearRoute()
@@ -632,11 +668,13 @@ function retry() {
 }
 
 onMounted(() => {
+  document.addEventListener('keydown', onViewerKeydown)
   startVisualViewportObserver()
   bootstrap()
 })
 
 onUnmounted(() => {
+  document.removeEventListener('keydown', onViewerKeydown)
   destroyFlag = true
   if (themeObserver) {
     themeObserver.disconnect()
@@ -758,8 +796,7 @@ onUnmounted(() => {
           class="map-hover-tip"
           :style="{ left: hoverTip.x + 'px', top: hoverTip.y + 'px' }"
         >
-          <!-- 悬浮气泡：有 photo/desc 时显示图片与描述（此注释可删） -->
-          <img v-if="hoverTip.building.photo" :src="hoverTip.building.photo" alt="" class="hover-img" />
+          <img v-if="buildingPhotos(hoverTip.building)[0]" :src="buildingPhotos(hoverTip.building)[0]" alt="" class="hover-img" />
           <p class="hover-name">{{ hoverTip.building.name }}</p>
           <p class="hover-cat">{{ (CATEGORY_CONFIG[hoverTip.building.category] || {}).label || '其他' }}</p>
           <p v-if="hoverTip.building.desc" class="hover-desc">{{ hoverTip.building.desc }}</p>
@@ -816,8 +853,18 @@ onUnmounted(() => {
         <!-- 选中地点详情卡片（右下角） -->
         <section v-if="selected" ref="detailCardEl" class="map-detail-card">
           <div class="detail-head">
-            <!-- 详情图可点击放大查看（此注释可删） -->
-            <img v-if="selected.photo" :src="selected.photo" alt="" class="detail-photo" @click.stop="photoViewer = true" />
+            <button
+              v-if="selectedPhotos.length"
+              type="button"
+              class="detail-photo-stack"
+              :class="{ 'detail-photo-stack-multiple': selectedPhotos.length > 1 }"
+              :aria-label="selectedPhotos.length > 1 ? `查看 ${selectedPhotos.length} 张地点图片` : '查看地点图片'"
+              @click.stop="openPhotoViewer()"
+            >
+              <img v-if="selectedPhotos.length > 1" :src="selectedPhotos[1]" alt="" class="detail-photo detail-photo-back" />
+              <img :src="selectedPhotos[0]" alt="" class="detail-photo detail-photo-front" />
+              <span v-if="selectedPhotos.length > 1" class="detail-photo-count">{{ selectedPhotos.length }}</span>
+            </button>
             <span class="detail-icon" v-html="categoryIconMarkup(selected.category, 15)"></span>
             <div class="detail-info">
               <h2 class="detail-name">{{ selected.name }}</h2>
@@ -864,11 +911,28 @@ onUnmounted(() => {
       </section>
     </div>
 
-    <!-- 大图查看层：点击遮罩任意处关闭（此注释可删） -->
     <Teleport to="body">
-      <div v-if="photoViewer && selected?.photo" class="map-photo-viewer" role="presentation" @click="photoViewer = false">
-        <img :src="selected.photo" alt="" class="map-photo-viewer-img" />
-        <p v-if="selected.name" class="map-photo-viewer-caption">{{ selected.name }}</p>
+      <div
+        v-if="photoViewer && currentViewerPhoto"
+        class="map-photo-viewer"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="`${selected?.name || '地点'}图片查看器`"
+        @click="closePhotoViewer"
+      >
+        <button class="map-photo-viewer-close" type="button" aria-label="关闭图片查看器" @click.stop="closePhotoViewer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+        <button v-if="selectedPhotos.length > 1" class="map-photo-viewer-nav map-photo-viewer-prev" type="button" aria-label="上一张图片" @click.stop="changeViewerPhoto(-1)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <img :src="currentViewerPhoto" :alt="`${selected?.name || '地点'}第 ${photoViewerIndex + 1} 张图片`" class="map-photo-viewer-img" @click.stop />
+        <button v-if="selectedPhotos.length > 1" class="map-photo-viewer-nav map-photo-viewer-next" type="button" aria-label="下一张图片" @click.stop="changeViewerPhoto(1)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <p v-if="selected?.name" class="map-photo-viewer-caption">
+          {{ selected.name }}<span v-if="selectedPhotos.length > 1"> · {{ photoViewerIndex + 1 }} / {{ selectedPhotos.length }}</span>
+        </p>
       </div>
     </Teleport>
   </section>
@@ -1293,15 +1357,58 @@ html.dark .map-section {
   line-height: 1.5;
   color: var(--c-muted);
 }
-/* 详情图点击查看大图（此注释可删） */
+.detail-photo-stack {
+  position: relative;
+  width: 104px;
+  height: 78px;
+  flex: 0 0 104px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
 .detail-photo {
+  position: absolute;
+  display: block;
   width: 96px;
   height: 72px;
-  flex-shrink: 0;
   object-fit: cover;
   border-radius: 8px;
-  border: 1px solid var(--c-line);
-  cursor: zoom-in;
+  border: 2px solid var(--c-elev);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.16);
+}
+.detail-photo-front {
+  z-index: 2;
+  top: 0;
+  left: 0;
+}
+.detail-photo-back {
+  z-index: 1;
+  top: 5px;
+  left: 6px;
+  transform: rotate(5deg);
+  transform-origin: center;
+}
+.detail-photo-count {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  z-index: 3;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+.detail-photo-stack:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 3px;
 }
 .map-photo-viewer {
   position: fixed;
@@ -1311,11 +1418,47 @@ html.dark .map-section {
   place-items: center;
   padding: 24px;
   background: rgba(0, 0, 0, 0.85);
-  cursor: zoom-out;
+}
+.map-photo-viewer-close,
+.map-photo-viewer-nav {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.62);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, transform 0.15s;
+}
+.map-photo-viewer-close {
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+.map-photo-viewer-nav {
+  top: 50%;
+  width: 48px;
+  height: 64px;
+  border-radius: 12px;
+  transform: translateY(-50%);
+}
+.map-photo-viewer-prev { left: max(18px, env(safe-area-inset-left)); }
+.map-photo-viewer-next { right: max(18px, env(safe-area-inset-right)); }
+.map-photo-viewer-close:hover,
+.map-photo-viewer-nav:hover { background: rgba(30, 41, 59, 0.9); }
+.map-photo-viewer-nav:active { transform: translateY(-50%) scale(0.96); }
+.map-photo-viewer-close:focus-visible,
+.map-photo-viewer-nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 .map-photo-viewer-img {
-  max-width: min(90vw, 900px);
-  max-height: 86vh;
+  max-width: min(calc(100vw - 160px), 1100px);
+  max-height: calc(100vh - 112px);
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
@@ -1328,6 +1471,26 @@ html.dark .map-section {
   margin: 0;
   color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .map-photo-viewer { padding: 64px 12px 76px; }
+  .map-photo-viewer-img {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 140px);
+  }
+  .map-photo-viewer-nav {
+    top: auto;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    transform: none;
+  }
+  .map-photo-viewer-prev { left: 18px; }
+  .map-photo-viewer-next { right: 18px; }
+  .map-photo-viewer-nav:active { transform: scale(0.96); }
+  .map-photo-viewer-caption { bottom: max(31px, calc(env(safe-area-inset-bottom) + 13px)); }
 }
 
 /* 缩放控件 */
