@@ -1,3 +1,8 @@
+/* z-index 分层：内容浮层 25 < 导航 45 < 遮罩 50 / 侧栏 60 */
+:root {
+  --vp-z-index-nav: 45;
+}
+
 :root:has(.site-announcement) {
   --vp-layout-top-height: 32px;
 }
@@ -57,7 +62,7 @@ body::before {
   position: fixed;
   top: var(--vp-nav-height);
   left: 0;
-  z-index: var(--vp-z-index-layout-top);
+  z-index: 25;
   width: 100%;
   display: flex;
   align-items: center;

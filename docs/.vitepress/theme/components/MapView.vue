@@ -924,7 +924,7 @@ html.dark .map-section {
 /* ===== 顶部工具条 ===== */
 .map-header {
   position: relative;
-  z-index: 30;
+  z-index: 25;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1253,7 +1253,7 @@ html.dark .map-section {
 /* hover 悬浮提示 */
 .map-hover-tip {
   position: absolute;
-  z-index: 80;
+  z-index: 25;
   pointer-events: none;
   transform: translate(-50%, -100%) translateY(-8px);
   padding: 12px 14px;
