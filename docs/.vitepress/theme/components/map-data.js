@@ -1,7 +1,8 @@
 /**
  * QUTWiKi 校园地图数据
  * 坐标统一使用 GCJ02（高德坐标系），从高德拾取器获取：https://lbs.amap.com/tools/picker
- * 添加点位：在 BUILDINGS 数组追加 { id, name, category, campusId, coord: [经度, 纬度], desc }
+ * 添加点位：在 BUILDINGS 数组追加 { id, name, category, campusId, coord: [经度, 纬度], desc, photos: ['图片地址'] }
+ * photos 可放多张图片；旧的单图 photo 字段仍可正常显示。
  */
 
 export const CATEGORY_CONFIG = {
@@ -97,7 +98,8 @@ export const BUILDINGS = [
     category: 'teaching',
     campusId: 'h',
     coord: [120.204057,35.974134],
-    desc: '新教学楼，位于礼贤广场西南侧。'
+    desc: '新教学楼，位于礼贤广场西南侧。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTmF2PUTIcd74wQ5AG.webp']
   },
   {
     id: 'h_college_01',
@@ -105,7 +107,55 @@ export const BUILDINGS = [
     category: 'college',
     campusId: 'h',
     coord: [120.206655,35.971914],
-    desc: '中央院系区实验楼，供各学院实验教学、竞赛及课题组科研实验使用。'
+    desc: '中央院系区实验楼，供各学院实验教学、竞赛及课题组科研实验使用。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTmWsb6QFah5kxKuw4.webp']
+  },
+  {
+    id: 'h_college_02',
+    name: '敦华楼',
+    category: 'college',
+    campusId: 'h',
+    coord: [120.205067,35.973993],
+    desc: '土木学院楼。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTmeNy9G8FxBBFKkaJ.webp']
+  },
+  {
+    id: 'h_college_03',
+    name: '土木楼',
+    category: 'college',
+    campusId: 'h',
+    coord: [120.205435,35.973501],
+    desc: '土木学院楼。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTlEeeNKEgeWpuz7Z8.webp',
+             'https://pic1.imgdb.cn/i/034MSTkEwdeUySt6tilaAl.webp'
+            ]
+  },
+  {
+    id: 'h_college_04',
+    name: '管院楼',
+    category: 'college',
+    campusId: 'h',
+    coord: [120.203947,35.972873],
+    desc: '管理工程学院楼。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTmaa5jjecC1TZMbwJ.webp']
+  },  
+  {
+    id: 'h_college_05',
+    name: '信控信管楼',
+    category: 'college',
+    campusId: 'h',
+    coord: [120.206066,35.972596],
+    desc: '信息与控制工程学院、信息管理学院楼。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTktV73cG0i2nqdKHt.webp']
+  },
+  {
+    id: 'h_college_06',
+    name: '环院楼',
+    category: 'college',
+    campusId: 'h',
+    coord: [120.205754, 35.972779],
+    desc: '环境与市政工程学院楼。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTkfeil1fWqFrOg7hW.webp']
   },
   {
     id: 'h_library_01',
@@ -114,7 +164,7 @@ export const BUILDINGS = [
     campusId: 'h',
     coord: [120.20438,35.976418],
     desc: '位于一号教学楼与礼贤广场之间，支持人脸/校园卡进入，自习区一座一码。',
-    photo: 'https://pic1.imgdb.cn/i/034K7pyD3sVgfDKDzTehBI.webp' 
+    photos: ['https://pic1.imgdb.cn/i/034K7pyD3sVgfDKDzTehBI.webp']
   },
   {
     id: 'h_landmark_01',
@@ -122,7 +172,8 @@ export const BUILDINGS = [
     category: 'landmark',
     campusId: 'h',
     coord: [120.204446,35.975244],
-    desc: '用于学院升旗仪式、奖学金颁发、毕业典礼、百团大战等活动。'
+    desc: '用于学院升旗仪式、奖学金颁发、毕业典礼、百团大战等活动。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTm6qiBiBT4Jpf84Vo.webp']
   },
   {
     id: 'h_canteen_01',
@@ -410,7 +461,8 @@ export const BUILDINGS = [
     category: 'food',
     campusId: 'h',
     coord: [120.202899,35.976352],
-    desc: '西操场下有肯德基、天下好面、临榆炸鸡腿、茶百道、云南傣族米线、橙堡（多摊位）、好想来、超市等。'
+    desc: '西操场下有肯德基、天下好面、临榆炸鸡腿、茶百道、云南傣族米线、橙堡（多摊位）、好想来、超市等。',
+    photos: ['https://pic1.imgdb.cn/i/034MSTk8DfuB5T1hZjXXWF.webp']
   },
   {
     id: 'h_express_00',
