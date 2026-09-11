@@ -3,14 +3,6 @@
   --vp-z-index-nav: 45;
 }
 
-:root:has(.site-announcement) {
-  --vp-layout-top-height: 32px;
-}
-
-:root:has(.site-announcement) .VPNav {
-  top: 0;
-}
-
 body::before {
   content: '';
   position: fixed;
@@ -56,38 +48,6 @@ body::before {
   display: table;
   width: 100%;
   table-layout: fixed;
-}
-
-.site-announcement {
-  position: fixed;
-  top: var(--vp-nav-height);
-  left: 0;
-  z-index: 25;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 32px;
-  padding: 6px 48px;
-  color: var(--announcement-color);
-  background: var(--announcement-background);
-  font-size: 13px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.site-announcement-message {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-@media (max-width: 639px) {
-  .site-announcement {
-    padding-right: 20px;
-    padding-left: 20px;
-  }
 }
 
 .vp-doc th,
