@@ -19,9 +19,9 @@ pageClass: flink-page
       siteshot: https://pic1.imgdb.cn/i/034JM0PKUxQ94Xl1DehaGY.webp
     - name: QUTCraft
       link: https://blog.qutcraft.cn/
-      avatar: https://pic1.imgdb.cn/i/033yyax4NtOd7cJXhYTXGJ.svg
+      avatar: https://pic1.imgdb.cn/i/034NYFkUb0hpuXmD2eHQSs.webp
       descr: 青岛理工大学 Minecraft 社（筹）是一个面向全校 Minecraft 爱好者的文化活动类学生社团。
-      siteshot: https://pic1.imgdb.cn/i/0349BPq7AAga9WhU4K7n0g.webp
+      siteshot: https://pic1.imgdb.cn/i/034NbzxpssQ1YyvoiIjS24.webp
     - name: QUTACM
       link: http://8.140.233.20/
       avatar: https://pic1.imgdb.cn/i/0345cIGXvGIbe6XaXK0Q1p.webp
@@ -49,7 +49,12 @@ pageClass: flink-page
       descr: 南开 Wiki -南开大学公益校园生活百科
       avatar: https://pic1.imgdb.cn/i/034JLxfrJIaOBytx5y8dI7.svg
       siteshot: https://pic1.imgdb.cn/i/034JLyk7o9jTTCrIU50dyv.webp
-    
+    - name: NCEPUwiki
+      link: https://wiki.ncepuinfo.cc/
+      descr: 华北电力大学学生共同维护的非官方校园知识库。把散落的经验，整理成下一位同学用得上的指南。
+      avatar: https://pic1.imgdb.cn/i/034NcYAXaYG3xUkpHgIa52.svg
+      siteshot: https://pic1.imgdb.cn/i/034NcI0mEeFh9ynjUmYUsz.webp
+
 </flink>
 
 <h2 align="center">推荐网站</h2>
